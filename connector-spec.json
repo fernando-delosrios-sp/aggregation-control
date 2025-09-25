@@ -4,10 +4,12 @@
     "supportsCustomSchemas": true,
     "showDebugLoggingOption": true,
     "sourceConfigInitialValues": {
+        "all": true
     },
     "commands": [
         "std:test-connection",
-        "std:account:list"
+        "std:account:list",
+        "std:config-options:read"
     ],
     "sourceConfig": [
         {
@@ -80,6 +82,22 @@
                                             "type": "number",
                                             "required": false,
                                             "helpKey": "Don't aggregate if changes are greater than this percentage"
+                                        },
+                                        {
+                                            "key": "all",
+                                            "label": "Compare all attributes",
+                                            "type": "toggle",
+                                            "required": true,
+                                            "helpKey": "Compare all schema attributes"
+                                        },
+                                        {
+                                            "key": "attributes",
+                                            "label": "Attributes",
+                                            "type": "list",
+                                            "parentKey": "all",
+                                            "parentValue": "false",
+                                            "required": true,
+                                            "helpKey": "Attributes to include in the snapshot"
                                         }
                                     ]
                                 }

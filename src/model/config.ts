@@ -1,6 +1,8 @@
 export type SourceConfig = {
     name: string
     percentage: number
+    all: boolean
+    attributes?: string[]
 }
 
 export interface Config {

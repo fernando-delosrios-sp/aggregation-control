@@ -8,7 +8,7 @@ import {
     PublicIdentitiesConfigApi,
     PublicIdentityConfig,
     ResourceObjectsRequestV2025,
-    ResourceObjectsResponseV2025, SourcesApi, SourcesV2025Api,
+    ResourceObjectsResponseV2025, Schema, SourcesApi, SourcesV2025Api,
     SourcesV2025ApiImportAccountsRequest,
     SourcesV2025ApiSearchResourceObjectsRequest
 } from 'sailpoint-api-client'
@@ -50,6 +50,14 @@ export class ISCClient {
         return response.data
     }
 
+    async listSourceSchemas(sourceId: string): Promise<Schema[]> {
+        const api = new SourcesApi(this.config)
+
+        const response = await api.getSourceSchemas({ sourceId })
+
+        return response.data
+    }
+
     async peekObjects(sourceId: string, objectType: string, maxCount: number): Promise<ResourceObjectsResponseV2025> {
         const api = new SourcesV2025Api(this.config)
         const resourceObjectsRequestV2025: ResourceObjectsRequestV2025 = {
@@ -67,7 +75,7 @@ export class ISCClient {
     async listAccounts(sourceId: string): Promise<Account[]> {
         const api = new AccountsApi(this.config)
         const requestParameters: AccountsApiListAccountsRequest = {
-            filters: "sourceId eq '$sourceId'"
+            filters: `sourceId eq "${sourceId}"`
         }
         const response = await api.listAccounts(requestParameters)
         return response.data
