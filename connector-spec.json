@@ -1,0 +1,109 @@
+{
+    "name": "Aggregation Control",
+    "description": "Aggregation Control connector",
+    "supportsCustomSchemas": true,
+    "showDebugLoggingOption": true,
+    "sourceConfigInitialValues": {
+    },
+    "commands": [
+        "std:test-connection",
+        "std:account:list"
+    ],
+    "sourceConfig": [
+        {
+            "type": "menu",
+            "label": "ISC connection details",
+            "items": [
+                {
+                    "type": "section",
+                    "sectionTitle": "Identity Security Cloud connection configuration",
+                    "sectionHelpMessage": "Connection details for Identity Security Cloud Tenant",
+                    "items": [
+                        {
+                            "key": "isc_baseurl",
+                            "label": "Identity Security Cloud API URL",
+                            "type": "url",
+                            "required": true
+                        },
+                        {
+                            "key": "isc_clientId",
+                            "label": "Personal Access Token ID",
+                            "type": "text",
+                            "required": true
+                        },
+                        {
+                            "key": "isc_clientSecret",
+                            "label": "Personal Access Token secret",
+                            "type": "secret",
+                            "required": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "menu",
+            "label": "Configuration",
+            "items": [
+                {
+                    "type": "section",
+                    "sectionTitle": "Sources",
+                    "sectionHelpMessage": "Source management configuration",
+                    "items": [
+                        {
+                            "key": "sources",
+                            "label": "Sources",
+                            "titleKey": "name",
+                            "subtitleKey": "percentage",
+                            "dragNDropEnabled": true,
+                            "deleteButton": true,
+                            "editButton": true,
+                            "addButton": true,
+                            "copyButton": true,
+                            "buttonLabel": "Add source configuration",
+                            "type": "cardList",
+                            "helpKey": "Configure the sources to be managed",
+                            "subMenus": [
+                                {
+                                    "label": "Source configuration",
+                                    "items": [
+                                        {
+                                            "key": "name",
+                                            "label": "Source name",
+                                            "type": "text",
+                                            "required": false,
+                                            "helpKey": "Source name"
+                                        },
+                                        {
+                                            "key": "percentage",
+                                            "label": "Percentage change",
+                                            "type": "number",
+                                            "required": false,
+                                            "helpKey": "Don't aggregate if changes are greater than this percentage"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "accountSchema": {
+        "displayAttribute": "name",
+        "identityAttribute": "id",
+        "attributes": [
+            {
+                "name": "id",
+                "type": "string",
+                "description": "ID"
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "description": "Name"
+            }
+        ]
+    }
+}
