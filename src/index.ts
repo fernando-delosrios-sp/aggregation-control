@@ -4,7 +4,7 @@ import {
     createConnector,
     logger,
     readConfig,
-    Response, StdAccountListHandler, StdConfigOptionsHandler, StdTestConnectionHandler
+    Response, StdAccountListHandler, StdAccountListOutput, StdConfigOptionsHandler, StdTestConnectionHandler
 } from '@sailpoint/connector-sdk'
 import { Config } from './model/config'
 import { ISCClient } from './isc-client'
@@ -69,10 +69,13 @@ export const connector = async () => {
             logger.info(`stdAccountList: Sources fetched: ${toLogString(sources)}`)
             if (config.sources) {
                 logger.info(`stdAccountList: Configured sources: ${toLogString(config.sources)}`)
-                sourceLoop: for (const source of config.sources) {
+                for (const source of config.sources) {
                     logger.info(`stdAccountList: Processing source: ${toLogString(source)}`)
                     const sourceObject = sources.find((s) => s.name === source.name)
                     if (sourceObject) {
+                        let message = ""
+                        let success = false
+                        
                         logger.info(`stdAccountList: Found sourceObject: ${toLogString(sourceObject)}`)
                         logger.debug(`stdAccountList: Fetching accounts for source id=${sourceObject.id}`)
                         const accounts = await isc.listAccounts(sourceObject.id!)
@@ -89,7 +92,9 @@ export const connector = async () => {
                         const newCount = response.objectCount
 
                         if (!newCount) {
-                            logger.error(`stdAccountList error=No new accounts found for source ${source.name}`)
+                            message = `stdAccountList error=No new accounts found for source ${source.name}`
+                            success = false
+                            logger.error(message)
                         }
 
                         logger.debug(`stdAccountList: Fetching source schemas for source id=${sourceObject.id}`)
@@ -106,13 +111,15 @@ export const connector = async () => {
                         const diffCount = Math.abs(newCount! - previousCount)
                         logger.info(`stdAccountList: diffCount=${diffCount}, newCount=${newCount}, previousCount=${previousCount}`)
                         if (diffCount > maxCount - previousCount) {
-                            logger.info(`stdAccountList info=Not aggregating accounts for source ${source.name} because the difference (${diffCount}) is greater than ${source.percentage}%`)
+                            success = false
+                            message = `stdAccountList info=Not aggregating accounts for source ${source.name} because the difference (${diffCount}) is greater than ${source.percentage}%`
+                            logger.info(message)
                         } else {
                             logger.debug('stdAccountList: Building accountsMap')
                             const accountsMap = new Map<string, any>()
                             accounts.reduce((p, c) => accountsMap.set(c.nativeIdentity!, c), accountsMap)
                             logger.debug(`stdAccountList: accountsMap size=${accountsMap.size}`)
-                            objectsLoop: for (const object of response.resourceObjects!) {
+                            for (const object of response.resourceObjects!) {
                                 logger.debug(`stdAccountList: Processing resourceObject: ${toLogString(object)}`)
                                 const previousAccount = accountsMap.get(object.identity!)
                                 if (previousAccount) {
@@ -130,22 +137,44 @@ export const connector = async () => {
                                     logger.info(`stdAccountList: New account detected for identity=${object.identity!}, total changes=${changes}`)
                                 }
                                 if (changes > maxChanges) {
-                                    logger.info(`stdAccountList info=Not aggregating accounts for source ${source.name} because the number of changes (${changes}) is greater than ${source.percentage}%`)
-                                    break sourceLoop
+                                    success = false
+                                    message = `stdAccountList info=Not aggregating accounts for source ${source.name} because the number of changes (${changes}) is greater than ${source.percentage}%`
+                                    logger.info(message)
+                                    break
                                 }
                             }
 
                             logger.info(`stdAccountList: Final changes=${changes}, remaining accounts in map=${accountsMap.size}, maxChanges=${maxChanges}`)
                             if (changes + accountsMap.size > maxChanges) {
-                                logger.info(`stdAccountList info=Not aggregating accounts for source ${source.name} because the number of changes (${changes + accountsMap.size}) is greater than ${source.percentage}%`)
+                                message = `stdAccountList info=Not aggregating accounts for source ${source.name} because the number of changes (${changes + accountsMap.size}) is greater than ${source.percentage}%`
+                                success = false
+                                logger.info(message)
                             } else {
-                                logger.info(`stdAccountList: Aggregating accounts for source id=${sourceObject.id}`)
+                                message = `stdAccountList: Aggregating accounts for source id=${sourceObject.id}`
+                                logger.info(message)
+                                success = true
                                 await isc.aggregateAccounts(sourceObject.id!)
                                 logger.info(`stdAccountList: Aggregation complete for source id=${sourceObject.id}`)
                             }
                         }
+
+                        const account: StdAccountListOutput = {
+                            identity: sourceObject.id!,
+                            uuid: sourceObject.name,
+                            attributes: {
+                                id: sourceObject.id!,
+                                name: sourceObject.name,
+                                percentage: source.percentage.toString(),
+                                date: new Date().toISOString(),
+                                success,
+                                message
+                            }
+                        }
+                        await send(res, account)
                     } else {
-                        logger.warn(`stdAccountList: Source object not found for source name=${source.name}`)
+                        const message = `stdAccountList: Source object not found for source name=${source.name}`
+                        logger.error(message)
+                        throw new ConnectorError(message)
                     }
                 }
             } else {

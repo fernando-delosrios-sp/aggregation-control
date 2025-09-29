@@ -6,11 +6,7 @@
     "sourceConfigInitialValues": {
         "all": true
     },
-    "commands": [
-        "std:test-connection",
-        "std:account:list",
-        "std:config-options:read"
-    ],
+    "commands": ["std:test-connection", "std:account:list", "std:config-options:read"],
     "sourceConfig": [
         {
             "type": "menu",
@@ -38,6 +34,13 @@
                             "label": "Personal Access Token secret",
                             "type": "secret",
                             "required": true
+                        },
+                        {
+                            "key": "cloudScope",
+                            "label": "AWS Accounts",
+                            "required": true,
+                            "type": "dynamicCheckboxList",
+                            "valuePath": "$.details"
                         }
                     ]
                 }
@@ -121,6 +124,26 @@
                 "name": "name",
                 "type": "string",
                 "description": "Name"
+            },
+            {
+                "name": "percentage",
+                "type": "string",
+                "description": "Percentage"
+            },
+            {
+                "name": "date",
+                "type": "string",
+                "description": "Aggregation date"
+            },
+            {
+                "name": "success",
+                "type": "boolean",
+                "description": "Success"
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "description": "Message"
             }
         ]
     }
