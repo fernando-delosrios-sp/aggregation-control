@@ -34,13 +34,6 @@
                             "label": "Personal Access Token secret",
                             "type": "secret",
                             "required": true
-                        },
-                        {
-                            "key": "cloudScope",
-                            "label": "AWS Accounts",
-                            "required": true,
-                            "type": "dynamicCheckboxList",
-                            "valuePath": "$.details"
                         }
                     ]
                 }

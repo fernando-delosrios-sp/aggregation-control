@@ -15,7 +15,7 @@ Key features include:
 -   Support for multiple sources, each with independent configuration.
 -   Option to compare all attributes or only specific ones for change detection.
 -   Flexible configuration via the ISC connector UI.
--   Built-in support for custom schemas and debug logging.
+-   **Per-source aggregation status accounts:** For each configured source, the connector creates a dedicated account that represents the results of the latest aggregation attempt. This account includes details such as the aggregation status, the number of detected changes, the configured threshold, and a message describing the outcome. This makes it easy to track aggregation results and status for each source directly within ISC.
 
 ## Configuration
 
@@ -39,5 +39,7 @@ The connector allows you to define one or more sources to manage. Each source ca
 -   **Attributes** (`attributes`): (Optional) A list of attribute names to include in the snapshot when `all` is set to false.
 
 You can add, edit, copy, or remove source configurations directly from the connector UI.
+
+For each source you configure, the connector will create a corresponding account in ISC that summarizes the latest aggregation result for that source.
 
 Example source configuration:
